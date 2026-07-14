@@ -25,7 +25,6 @@ import {
   AlertCircle,
   ChevronDown,
   Filter,
-  Music,
   Calculator,
   Eye,
   Wallet,
@@ -1275,20 +1274,20 @@ export const Projects: React.FC = () => {
           >
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-sm">
-                <Music size={28} strokeWidth={2.5} />
+                <Briefcase size={28} strokeWidth={2.5} />
               </div>
               <div className="flex flex-col justify-center">
                 <h1
                   className="text-3xl font-black text-slate-900 leading-none mb-1.5 tracking-tight pdf-exact-text"
                   style={{ lineHeight: "1" }}
                 >
-                  Manage-Me
+                  Ay Bay
                 </h1>
                 <h2
                   className="text-[10px] font-bold text-indigo-600 tracking-[0.2em] uppercase leading-none pdf-exact-text"
                   style={{ lineHeight: "1" }}
                 >
-                  Professional Studio Manager
+                  Professional Project Manager
                 </h2>
               </div>
             </div>
@@ -1550,7 +1549,7 @@ export const Projects: React.FC = () => {
                           <div
                             className={`${isGeneratingPDF ? "w-14 h-14 rounded-2xl" : "w-10 h-10 rounded-xl"} bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0`}
                           >
-                            <Music size={isGeneratingPDF ? 28 : 20} />
+                            <Briefcase size={isGeneratingPDF ? 28 : 20} />
                           </div>
                           <div className="min-w-0 flex-1">
                             <h3
@@ -1842,7 +1841,7 @@ export const Projects: React.FC = () => {
                       <div
                         className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-sm shrink-0 ${viewProject.status === "Completed" ? "bg-emerald-500" : viewProject.status === "In Progress" ? "bg-blue-600" : "bg-amber-500"}`}
                       >
-                        <Music size={24} />
+                        <Briefcase size={24} />
                       </div>
                       <div className="flex-1">
                         <h2
@@ -2479,7 +2478,7 @@ export const Projects: React.FC = () => {
                         await navigator.share({
                           files: [file],
                           title: "Project Report",
-                          text: "Manage-Me Project Report",
+                          text: "Ay Bay Project Report",
                         });
                       }
                     } catch (e) {

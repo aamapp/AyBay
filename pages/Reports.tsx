@@ -26,7 +26,6 @@ import {
   AlertCircle,
   ExternalLink,
   Copy,
-  Music,
   Filter,
   Loader2,
   ChevronRight,
@@ -1501,7 +1500,7 @@ export const Reports: React.FC = () => {
                 try {
                   await navigator.share({
                     files: [file],
-                    title: "Manage-Me Report",
+                    title: "Ay Bay Report",
                     text: `Financial Report for ${user?.name}`,
                   });
                 } catch (e) {
@@ -1739,20 +1738,20 @@ export const Reports: React.FC = () => {
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-sm">
-                      <Music size={28} strokeWidth={2.5} />
+                      <TrendingUp size={28} strokeWidth={2.5} />
                     </div>
                     <div className="flex flex-col justify-center">
                       <h1
                         className="text-3xl font-black text-slate-900 leading-none mb-1.5 tracking-tight pdf-exact-text"
                         style={{ lineHeight: "1" }}
                       >
-                        Manage-Me
+                        Ay Bay
                       </h1>
                       <h2
                         className="text-[10px] font-bold text-indigo-600 tracking-[0.2em] uppercase leading-none pdf-exact-text"
                         style={{ lineHeight: "1" }}
                       >
-                        Professional Studio Manager
+                        Professional Report Manager
                       </h2>
                     </div>
                   </div>
@@ -3995,7 +3994,7 @@ export const Reports: React.FC = () => {
                         if (navigator.share) {
                           await navigator.share({
                             files: [file],
-                            title: "Manage-Me Report",
+                            title: "Ay Bay Report",
                             text: "Financial Report",
                           });
                         }

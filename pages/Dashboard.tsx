@@ -9,7 +9,6 @@ import {
   Wallet,
   ArrowUpRight,
   Inbox,
-  Music,
   LayoutDashboard,
   AlertCircle,
   Users,
@@ -376,7 +375,7 @@ export const Dashboard: React.FC = () => {
                 <div className="flex items-center gap-3 flex-1 min-w-0 mr-2">
                    {/* Smart Icon */}
                    <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                     <Music size={18} />
+                     <Briefcase size={18} />
                    </div>
                    
                    <div className="min-w-0 flex-1">

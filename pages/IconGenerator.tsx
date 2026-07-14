@@ -56,7 +56,7 @@ export const IconGenerator: React.FC = () => {
             <ImageIcon size={32} />
           </div>
           
-          <h1 className="text-2xl font-bold text-slate-900 mb-2">Manage-Me হাই-রেজোলিউশন আইকন</h1>
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">Ay Bay (আয় ব্যয়) হাই-রেজোলিউশন আইকন</h1>
           <p className="text-slate-500 mb-10 max-w-md mx-auto">
             নিচের লোগোটি আপনার দেওয়া ডিজাইনের হুবহু কপি এবং এটি ১০২৪x১০২৪ পিক্সেল সাইজের। এটি ডাউনলোড করে ব্যবহার করুন।
           </p>

@@ -27,7 +27,6 @@ import {
   Banknote,
   Calculator,
   Download,
-  Music,
   Filter,
   ChevronDown,
   Check,
@@ -1172,20 +1171,20 @@ export const Income: React.FC = () => {
           >
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-sm">
-                <Music size={28} strokeWidth={2.5} />
+                <Wallet size={28} strokeWidth={2.5} />
               </div>
               <div className="flex flex-col justify-center">
                 <h1
                   className="text-3xl font-black text-slate-900 leading-none mb-1.5 tracking-tight pdf-exact-text"
                   style={{ lineHeight: "1" }}
                 >
-                  Manage-Me
+                  Ay Bay
                 </h1>
                 <h2
                   className="text-[10px] font-bold text-indigo-600 tracking-[0.2em] uppercase leading-none pdf-exact-text"
                   style={{ lineHeight: "1" }}
                 >
-                  Professional Studio Manager
+                  Professional Income Manager
                 </h2>
               </div>
             </div>

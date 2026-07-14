@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { APP_NAME } from '../constants';
-import { Mail, Lock, User, Music, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 interface SignupProps {
   onSignup: (name: string, email: string, password?: string) => void;
@@ -31,9 +31,7 @@ export const Signup: React.FC<SignupProps> = ({ onSignup, onGoToLogin }) => {
              <h1 className="text-2xl font-black text-white tracking-tight mb-2">নতুন একাউন্ট</h1>
             <p className="text-indigo-200 text-sm font-medium">আমাদের কমিউনিটিতে যোগ দিন</p>
         </div>
-         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-10 pointer-events-none">
-          <Music size={200} />
-        </div>
+         {/* Removed background music logo */}
       </div>
 
       <div className="flex-1 px-6 -mt-12 relative z-20 pb-10 flex justify-center">

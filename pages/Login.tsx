@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { APP_NAME } from '../constants';
-import { Mail, Lock, Music, Eye, EyeOff, ArrowLeft, Send, Loader2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, Send, Loader2 } from 'lucide-react';
 import { AppLogo } from '../components/AppLogo';
 
 interface LoginProps {
@@ -47,9 +47,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword, onGoToSi
             <h1 className="text-3xl font-black text-white tracking-tight mb-2">{APP_NAME}</h1>
             <p className="text-indigo-200 text-sm font-medium">অডিও প্রজেক্ট ম্যানেজমেন্ট অ্যাপ</p>
         </div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-10 pointer-events-none">
-          <Music size={200} />
-        </div>
+        {/* Removed background music logo */}
       </div>
 
       <div className="flex-1 px-6 -mt-12 relative z-20 pb-10 flex justify-center">
