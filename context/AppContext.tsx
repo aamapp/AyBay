@@ -1090,8 +1090,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsAppLocked(true);
     }
 
+    // Safety fallback timeout to prevent infinite/prolonged blank white screen on app launch (e.g., inside Android WebView/slow network)
+    const safetyTimeout = setTimeout(() => {
+      if (mounted) {
+        console.log("App loading safety timeout triggered - forcing loading to false");
+        setLoading(false);
+      }
+    }, 2500);
+
     if (!isConfigured) {
       setLoading(false);
+      clearTimeout(safetyTimeout);
       return;
     }
 
@@ -1133,7 +1142,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
               initSession();
             };
             window.addEventListener("online", handleOnline);
-            // We don't set loading to false here, we wait for the online event
+            // Even if offline, we set loading to false so the user can use cached offline data or view the login screen rather than a blank page
+            if (mounted) {
+              setLoading(false);
+            }
             return;
           }
         }
@@ -1345,6 +1357,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
     return () => {
       mounted = false;
+      clearTimeout(safetyTimeout);
       subscription.unsubscribe();
     };
   }, [showToast]);
