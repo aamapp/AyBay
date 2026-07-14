@@ -3628,19 +3628,7 @@ export const Expenses: React.FC = () => {
                     </div>
                   ) : (
                     <>
-                      <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-4 select-none">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-xs">
-                          <Menu size={20} />
-                        </div>
-                        <div>
-                          <h3 className="text-base font-black text-slate-800" style={{ fontFamily: "'Kohinoor Bangla', sans-serif" }}>
-                            অন্যান্য ফিচার ও অপশনসমূহ
-                          </h3>
-                          <p className="text-[10px] sm:text-xs font-medium text-slate-400 uppercase tracking-wider">
-                            সহজে অ্যাক্সেস করুন যেকোনো সেকশন
-                          </p>
-                        </div>
-                      </div>
+                      {/* Removed header as requested */}
 
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {SECONDARY_NAV.map((item) => (
