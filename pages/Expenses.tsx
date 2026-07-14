@@ -842,6 +842,9 @@ export const Expenses: React.FC = () => {
   }, [activeTab]);
 
   const getFabColor = () => {
+    if (activeTab === "menu" && menuSubView === "wallet") {
+      return "bg-[#1a73e8] hover:bg-blue-700 shadow-blue-100";
+    }
     switch (activeTab) {
       case "dues":
         return "bg-teal-600 hover:bg-teal-700 shadow-teal-100";
@@ -857,6 +860,9 @@ export const Expenses: React.FC = () => {
   };
 
   const getFabTitle = () => {
+    if (activeTab === "menu" && menuSubView === "wallet") {
+      return "নতুন ওয়ালেট";
+    }
     switch (activeTab) {
       case "dues":
         return "নতুন দেনাদার/পাওনাদার";
@@ -874,6 +880,10 @@ export const Expenses: React.FC = () => {
   const handleFabClick = () => {
     if (activeTab === "expenses") {
       handleOpenAddModal();
+    } else if (activeTab === "menu" && menuSubView === "wallet") {
+      window.dispatchEvent(
+        new CustomEvent("open-add-modal", { detail: { tab: "wallet" } }),
+      );
     } else {
       window.dispatchEvent(
         new CustomEvent("open-add-modal", { detail: { tab: activeTab } }),
@@ -3732,7 +3742,7 @@ export const Expenses: React.FC = () => {
 
       {/* Sticky Floating Action Button on Bottom Right (Unified Grid for all Tabs/Slides) */}
       {isOnline && !isGeneratingPDF &&
-        activeTab !== "menu" &&
+        (activeTab !== "menu" || (menuSubView === "wallet" && !isWalletSubView)) &&
         (!isWalletSubView || activeTab !== "wallet") &&
         (activeTab !== "dues" || duesActiveView !== "details") &&
         createPortal(
