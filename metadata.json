@@ -1,0 +1,10 @@
+{
+  "name": "Ay-Bay",
+  "description": "আর্থিক ব্যবস্থাপনা সিস্টেম। ",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
