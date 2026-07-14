@@ -293,18 +293,6 @@ export const Expenses: React.FC = () => {
       desc: "বাজারের তালিকা",
     },
     {
-      name: "গজল নোট",
-      path: "/ghazal-notes",
-      icon: <BookOpen size={20} />,
-      desc: "গজলের লিরিক সংগ্রহ",
-    },
-    {
-      name: "ক্লায়েন্ট",
-      path: "/clients",
-      icon: <Users size={20} />,
-      desc: "ক্লায়েন্ট তালিকা",
-    },
-    {
       name: "গাড়ি ভাড়া হিসাব",
       path: "/car-rent",
       icon: <Car size={20} />,
@@ -321,18 +309,6 @@ export const Expenses: React.FC = () => {
       path: "/trash",
       icon: <Trash2 size={20} />,
       desc: "ডিলিট করা প্রজেক্ট",
-    },
-    {
-      name: "প্রজেক্ট ব্যাকআপ",
-      path: "/projects-backup",
-      icon: <HardDrive size={20} />,
-      desc: "সম্পন্ন প্রজেক্ট ব্যাকআপ",
-    },
-    {
-      name: "সেটিংস",
-      path: "/settings",
-      icon: <Settings size={20} />,
-      desc: "অ্যাপ কনফিগারেশন",
     },
   ];
 
@@ -380,6 +356,7 @@ export const Expenses: React.FC = () => {
   }, [activeTabState]);
 
   const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const mainContainerRef = useRef<HTMLDivElement>(null);
   const containerWidthRef = useRef<number>(448);
   const screenWidthRef = useRef<number>(window.innerWidth);
 
@@ -456,6 +433,19 @@ export const Expenses: React.FC = () => {
     );
   }, [activeTabState]);
 
+  // Dispatch real-time swipe details for the dynamic header active indicator
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("expense-swipe-update", {
+        detail: {
+          isSwiping,
+          swipeOffset,
+          activeTab: activeTabState,
+        },
+      }),
+    );
+  }, [isSwiping, swipeOffset, activeTabState]);
+
   useEffect(() => {
     const handleSetTab = (e: Event) => {
       const customEvent = e as CustomEvent;
@@ -470,8 +460,14 @@ export const Expenses: React.FC = () => {
   const getSlideClassName = (tabName: string) => {
     const isActive = activeTab === tabName;
     if (isActive || isSwiping || isTabTransitioning) {
-      if (tabName === "expenses" || tabName === "dues" || tabName === "wallet") {
-        return "w-full shrink-0 px-3 lg:px-8 pb-4 h-full flex flex-col overflow-hidden pt-[22px]";
+      if (
+        tabName === "expenses" ||
+        tabName === "dues" ||
+        tabName === "wallet" ||
+        (tabName === "menu" && menuSubView === "wallet")
+      ) {
+        const paddingClass = menuSubView === "wallet" && tabName === "menu" ? "px-1 sm:px-4" : "px-3 lg:px-8";
+        return `w-full shrink-0 ${paddingClass} pb-4 h-full flex flex-col overflow-hidden pt-[22px]`;
       }
       return "w-full shrink-0 px-3 lg:px-8 pb-4 overflow-y-auto h-full pt-[22px]";
     }
@@ -516,7 +512,7 @@ export const Expenses: React.FC = () => {
     // Disable swiping globally if any modal, overlay backdrop, dropdown, or numeric keypad is currently open
     if (typeof document !== "undefined") {
       const hasActiveOverlay = !!document.querySelector(
-        '.backdrop-blur, .fixed.inset-0, [role="dialog"], .keypad-container, .no-swipe',
+        '.fixed.inset-0 .backdrop-blur, [role="dialog"], .keypad-container',
       );
       if (hasActiveOverlay) {
         return;
@@ -621,12 +617,51 @@ export const Expenses: React.FC = () => {
     touchStartY.current = null;
   };
 
+  const touchHandlersRef = useRef({
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+  });
+
+  useEffect(() => {
+    touchHandlersRef.current = {
+      handleTouchStart,
+      handleTouchMove,
+      handleTouchEnd,
+    };
+  }, [handleTouchStart, handleTouchMove, handleTouchEnd]);
+
+  useEffect(() => {
+    const el = mainContainerRef.current;
+    if (!el) return;
+
+    const onTouchStart = (e: TouchEvent) => {
+      touchHandlersRef.current.handleTouchStart(e as any);
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      touchHandlersRef.current.handleTouchMove(e as any);
+    };
+    const onTouchEnd = () => {
+      touchHandlersRef.current.handleTouchEnd();
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+    };
+  }, []);
+
   // Dragging support for mouse gesture (PC/Desktop drag-to-scroll/swipe)
   const handleMouseDown = (e: React.MouseEvent) => {
     // Disable swiping globally if any modal, overlay backdrop, dropdown, or numeric keypad is currently open
     if (typeof document !== "undefined") {
       const hasActiveOverlay = !!document.querySelector(
-        '.backdrop-blur, .fixed.inset-0, [role="dialog"], .keypad-container, .no-swipe',
+        '.fixed.inset-0 .backdrop-blur, [role="dialog"], .keypad-container',
       );
       if (hasActiveOverlay) {
         return;
@@ -2394,9 +2429,7 @@ export const Expenses: React.FC = () => {
   return (
     <>
       <div
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        ref={mainContainerRef}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -2570,9 +2603,9 @@ export const Expenses: React.FC = () => {
               style={{
                 width: "27px",
                 left: `${getIndicatorLeft()}px`,
-                transition: isSwiping
-                  ? "none"
-                  : "left 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+                transitionProperty: "left",
+                transitionDuration: isSwiping ? "0s" : "0.75s",
+                transitionTimingFunction: "cubic-bezier(0.4, 1.65, 0.45, 1.0)",
               }}
             />
           </div>
@@ -2583,9 +2616,9 @@ export const Expenses: React.FC = () => {
             className="flex w-full h-full"
             style={{
               transform: `translateX(calc(-${tabs.indexOf(activeTab) * 100}% - ${isSwiping ? swipeOffset : 0}px))`,
-              transition: isSwiping
-                ? "none"
-                : "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+              transitionProperty: "transform",
+              transitionDuration: isSwiping ? "0s" : "0.7s",
+              transitionTimingFunction: "cubic-bezier(0.4, 1.3, 0.45, 1.0)",
             }}
           >
             {/* Slide 1: Expenses/Dashboard (Index 0) */}
@@ -2602,10 +2635,10 @@ export const Expenses: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setStatsFilter("today")}
-                    className={`flex-1 text-center text-[15px] sm:text-[16px] font-medium transition-all h-full ${
+                    className={`flex-1 text-center text-[15px] sm:text-[16px] transition-all h-full ${
                       statsFilter === "today"
-                        ? "bg-[#1e75eb] text-white rounded-l-full"
-                        : "text-[#111827] hover:text-black bg-transparent"
+                        ? "bg-[#1e75eb] text-white rounded-l-full font-bold"
+                        : "text-[#111827] hover:text-black bg-transparent font-medium"
                     }`}
                   >
                     আজ
@@ -2613,10 +2646,10 @@ export const Expenses: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setStatsFilter("month")}
-                    className={`flex-1 text-center text-[15px] sm:text-[16px] font-medium transition-all h-full ${
+                    className={`flex-1 text-center text-[15px] sm:text-[16px] transition-all h-full ${
                       statsFilter === "month"
-                        ? "bg-[#1e75eb] text-white"
-                        : "text-[#111827] hover:text-black bg-transparent"
+                        ? "bg-[#1e75eb] text-white font-bold"
+                        : "text-[#111827] hover:text-black bg-transparent font-medium"
                     }`}
                   >
                     {getCurrentBengaliMonthName()}
@@ -2624,10 +2657,10 @@ export const Expenses: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setStatsFilter("total")}
-                    className={`flex-1 text-center text-[15px] sm:text-[16px] font-medium transition-all h-full ${
+                    className={`flex-1 text-center text-[15px] sm:text-[16px] transition-all h-full ${
                       statsFilter === "total"
-                        ? "bg-[#1e75eb] text-white rounded-r-full"
-                        : "text-[#111827] hover:text-black bg-transparent"
+                        ? "bg-[#1e75eb] text-white rounded-r-full font-bold"
+                        : "text-[#111827] hover:text-black bg-transparent font-medium"
                     }`}
                   >
                     মোট
@@ -2704,7 +2737,7 @@ export const Expenses: React.FC = () => {
 
               {/* STICKY SEARCH & FILTER CONTROLS */}
               <div 
-                className="sticky top-14 bg-[#fafbfd] z-20 pb-2.5 pt-1 space-y-2.5 -mx-3 px-3 lg:-mx-8 lg:px-8 mb-3 no-swipe" 
+                className="sticky top-14 bg-white z-20 pb-2.5 pt-1 space-y-2.5 -mx-3 px-3 lg:-mx-8 lg:px-8 mb-3 no-swipe" 
                 style={{ touchAction: "pan-y" }}
                 {...blockSwipeProps}
               >
@@ -2741,10 +2774,10 @@ export const Expenses: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setListFilter("all")}
-                        className={`px-[26px] py-1.5 text-[14px] font-medium rounded-[6px] transition-all ${
+                        className={`px-[26px] py-1.5 text-[14px] rounded-[6px] transition-all ${
                           listFilter === "all"
-                            ? "bg-[#e2edfc] text-[#1a73e8]"
-                            : "text-[#8e9aa8] hover:text-slate-700"
+                            ? "bg-[#e2edfc] text-[#1a73e8] font-bold"
+                            : "text-[#8e9aa8] hover:text-slate-700 font-medium"
                         }`}
                       >
                         সব
@@ -2752,10 +2785,10 @@ export const Expenses: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setListFilter("income")}
-                        className={`px-[26px] py-1.5 text-[14px] font-medium rounded-[6px] transition-all ${
+                        className={`px-[26px] py-1.5 text-[14px] rounded-[6px] transition-all ${
                           listFilter === "income"
-                            ? "bg-[#e2fced] text-[#50AD54]"
-                            : "text-[#8e9aa8] hover:text-slate-700"
+                            ? "bg-[#e2fced] text-[#50AD54] font-bold"
+                            : "text-[#8e9aa8] hover:text-slate-700 font-medium"
                         }`}
                       >
                         আয়
@@ -2763,10 +2796,10 @@ export const Expenses: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setListFilter("expense")}
-                        className={`px-[26px] py-1.5 text-[14px] font-medium rounded-[6px] transition-all ${
+                        className={`px-[26px] py-1.5 text-[14px] rounded-[6px] transition-all ${
                           listFilter === "expense"
-                            ? "bg-[#fcedeb] text-[#db4437]"
-                            : "text-[#8e9aa8] hover:text-slate-700"
+                            ? "bg-[#fcedeb] text-[#db4437] font-bold"
+                            : "text-[#8e9aa8] hover:text-slate-700 font-medium"
                         }`}
                       >
                         ব্যয়
@@ -2928,7 +2961,7 @@ export const Expenses: React.FC = () => {
                   className="flex flex-col space-y-4"
                 >
                   {groupedTransactions.length === 0 ? (
-                    <div className="py-16 text-center text-slate-400 bg-slate-50/50 rounded-2xl border border-slate-100 border-dashed">
+                    <div className="py-20 text-center text-slate-400 select-none">
                       <CustomReceiptIcon size={64} strokeWidth={1.5} className="mx-auto mb-3 opacity-30 text-slate-400" />
                       <p className="text-xs font-semibold">
                         কোনো লেনদেন পাওয়া যায়নি
@@ -3614,18 +3647,40 @@ export const Expenses: React.FC = () => {
               {shouldRenderTab("menu") && (
                 <div className="w-full max-w-lg lg:max-w-2xl mx-auto py-4 px-2 space-y-6">
                   {menuSubView === "wallet" ? (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                      {/* Back Button */}
-                      <button
-                        onClick={() => setMenuSubView("none")}
-                        className="flex items-center gap-2 text-indigo-600 font-bold text-xs mb-1 cursor-pointer active:scale-95 transition-all bg-slate-50 border border-slate-200/80 px-4 py-2.5 rounded-xl hover:bg-slate-100 shadow-xs"
-                        style={{ fontFamily: "'Kohinoor Bangla', sans-serif" }}
-                      >
-                        <ArrowLeft size={15} />
-                        <span>মেনু অপশনে ফিরে যান</span>
-                      </button>
-                      <WalletManager />
-                    </div>
+                    createPortal(
+                      <div className="fixed inset-0 bg-[#f8fafc] z-[1000] flex flex-col overflow-hidden h-full animate-in fade-in duration-200">
+                        {/* Premium Header */}
+                        <header className="flex-none h-14 bg-white border-b border-slate-200/80 px-4 flex items-center justify-between relative shadow-xs">
+                          {/* Left Back Button */}
+                          <button
+                            onClick={() => setMenuSubView("none")}
+                            className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-800 active:scale-95 transition-all hover:bg-slate-100 cursor-pointer shrink-0 shadow-sm z-10"
+                            aria-label="Back to menu"
+                          >
+                            <ArrowLeft size={18} />
+                          </button>
+
+                          {/* Center Title */}
+                          <div className="absolute inset-x-0 text-center flex items-center justify-center pointer-events-none">
+                            <span 
+                              className="text-slate-800 font-semibold text-[17px] tracking-wide"
+                              style={{ fontFamily: "'Kohinoor Bangla', sans-serif" }}
+                            >
+                              ওয়ালেট ও পেমেন্ট হিসাব
+                            </span>
+                          </div>
+
+                          {/* Right Placeholder for balancing */}
+                          <div className="w-9 h-9 pointer-events-none" />
+                        </header>
+
+                        {/* Content Area */}
+                        <div className="flex-1 overflow-hidden w-full max-w-5xl mx-auto px-4 py-4">
+                          <WalletManager />
+                        </div>
+                      </div>,
+                      document.body
+                    )
                   ) : (
                     <>
                       {/* Removed header as requested */}
@@ -3641,7 +3696,7 @@ export const Expenses: React.FC = () => {
                                 navigate(item.path);
                               }
                             }}
-                            className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white border border-slate-100 shadow-xs active:scale-95 transition-all group hover:border-indigo-200 hover:shadow-sm cursor-pointer text-center relative"
+                            className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white border border-slate-100 shadow-xs active:scale-95 transition-all group hover:border-indigo-200 hover:shadow-sm cursor-pointer text-center relative focus:outline-none focus-visible:outline-none focus:ring-0 focus:border-slate-100 select-none"
                           >
                             <div className="w-10 h-10 rounded-full bg-slate-50 text-slate-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 shadow-xs mb-3.5 relative">
                               {item.icon}
@@ -5435,9 +5490,9 @@ const DuesManager: React.FC<DuesManagerProps> = ({
           <div className="flex items-center gap-3">
             <button
               onClick={() => setActiveView("list")}
-              className="p-1.5 hover:bg-slate-200/60 active:scale-95 text-slate-700 rounded-full transition-all"
+              className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-800 active:scale-95 transition-all hover:bg-slate-100 cursor-pointer shrink-0 shadow-sm"
             >
-              <ArrowLeft size={22} strokeWidth={2.5} />
+              <ArrowLeft size={18} />
             </button>
             <div className="text-left">
               <h2 className="text-[17px] font-bold text-slate-900 leading-tight">
@@ -5778,9 +5833,9 @@ const DuesManager: React.FC<DuesManagerProps> = ({
                         resetTransactionForm();
                         setIsTxDatePickerOpen(false);
                       }}
-                      className="p-2 -ml-2 text-slate-800 hover:bg-slate-100 rounded-full transition-colors"
+                      className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-800 active:scale-95 transition-all hover:bg-slate-100 cursor-pointer shrink-0 shadow-sm"
                     >
-                      <ArrowLeft size={24} strokeWidth={2.5} />
+                      <ArrowLeft size={18} />
                     </button>
                     <h2 className="text-[17px] font-bold text-slate-800">
                       {isEditingTx ? "লেনদেন আপডেট করুন" : "লেনদেন অ্যাড করুন"}
@@ -6195,7 +6250,7 @@ const DuesManager: React.FC<DuesManagerProps> = ({
 
       {/* STICKY SEARCH */}
       <div 
-        className="sticky top-14 bg-[#fafbfd] z-20 pb-2.5 pt-1 -mx-3 px-3 lg:-mx-8 lg:px-8 mb-2 flex-none no-swipe" 
+        className="sticky top-14 bg-white z-20 pb-2.5 pt-1 -mx-3 px-3 lg:-mx-8 lg:px-8 mb-2 flex-none no-swipe" 
         style={{ touchAction: "pan-y" }}
         {...blockSwipeProps}
       >
@@ -6355,9 +6410,9 @@ const DuesManager: React.FC<DuesManagerProps> = ({
                     resetPersonForm();
                     setIsDatePickerOpen(false);
                   }}
-                  className="p-2 -ml-2 text-slate-700 hover:bg-slate-100 rounded-full transition-colors"
+                  className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-800 active:scale-95 transition-all hover:bg-slate-100 cursor-pointer shrink-0 shadow-sm"
                 >
-                  <ArrowLeft size={24} strokeWidth={2.5} />
+                  <ArrowLeft size={18} />
                 </button>
                 <h2 className="text-[18px] font-bold text-slate-800">
                   {isEditingPerson ? "এডিট ব্যক্তি" : "নতুন ব্যক্তি"}
@@ -7839,9 +7894,9 @@ const BudgetManager: React.FC<{ expenses: any[]; user: any }> = ({
               setActiveView("list");
               setSelectedCategory(null);
             }}
-            className="p-2 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
+            className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-800 active:scale-95 transition-all hover:bg-slate-100 cursor-pointer shrink-0 shadow-sm"
           >
-            <ArrowLeft size={20} className="text-slate-700" />
+            <ArrowLeft size={18} />
           </button>
           <div className="text-left">
             <h2 className="text-base font-bold text-slate-800">বাজেট বিবরণ</h2>

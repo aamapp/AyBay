@@ -1256,7 +1256,7 @@ export const WalletManager: React.FC = () => {
           </div>
 
           {/* Controls Wrapper inside the static block with standardized padding */}
-          <div className="w-full max-w-lg mx-auto px-4 flex flex-col gap-2.5">
+          <div className="w-full max-w-none mx-auto px-4 flex flex-col gap-2.5">
             {/* Dynamic Period Stats Card - Unifying Income and Expense - perfectly matching Expenses.tsx */}
             <div className="bg-[#fafbfd] border border-[#e2e7ec]/80 py-2.5 px-3.5 rounded-[12px] shadow-[0_2px_8px_rgba(0,0,0,0.02)] w-full select-none">
               {/* Period Segment Tabs matching the image */}
@@ -1500,7 +1500,7 @@ export const WalletManager: React.FC = () => {
         </div>
 
         {/* 2. Responsive Content Container wrapper for scrollable transaction list */}
-        <div className="w-full max-w-lg mx-auto px-4 pt-2.5 flex-1 flex flex-col gap-2.5 overflow-hidden">
+        <div className="w-full max-w-none mx-auto px-4 pt-2.5 flex-1 flex flex-col gap-2.5 overflow-hidden">
 
           {/* Ledger Listing grouped by Date precisely matching Expenses page */}
           <div className="flex-1 overflow-y-auto pr-0.5 pb-24 flex flex-col space-y-4 animate-in fade-in duration-300 no-swipe" style={{ touchAction: 'pan-y' }} {...blockSwipeProps}>
@@ -1610,7 +1610,7 @@ export const WalletManager: React.FC = () => {
 
 
   return (
-    <div className="w-full max-w-lg mx-auto px-0.5 select-none relative animate-in fade-in duration-300 h-full flex flex-col overflow-hidden">
+    <div className="w-full max-w-none mx-auto px-0.5 select-none relative animate-in fade-in duration-300 h-full flex flex-col overflow-hidden">
       
       {/* 1. Header Card - Total Balance */}
       <div 

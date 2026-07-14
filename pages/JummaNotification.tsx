@@ -10,9 +10,9 @@ export const JummaNotification = () => {
       <div className="sticky top-0 z-10 bg-white px-4 py-3 flex items-center gap-3">
         <button 
           onClick={() => navigate(-1)} 
-          className="w-10 h-10 flex items-center justify-center -ml-2 rounded-full active:bg-slate-100 transition-colors"
+          className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-800 active:scale-95 transition-all hover:bg-slate-100 cursor-pointer shrink-0 shadow-sm"
         >
-          <ArrowLeft size={24} className="text-slate-800" />
+          <ArrowLeft size={18} />
         </button>
         <h1 className="text-[19px] font-normal text-slate-800" style={{ fontFamily: "'Kohinoor Bangla', sans-serif" }}>নোটিফিকেশন বিস্তারিত</h1>
       </div>

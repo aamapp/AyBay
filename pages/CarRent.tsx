@@ -1226,9 +1226,9 @@ export const CarRent: React.FC = () => {
           <div className="flex items-center gap-1">
             <button
               onClick={() => setViewState("main")}
-              className="p-1 text-slate-800 hover:text-slate-950 active:scale-95 transition-all cursor-pointer"
+              className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-800 active:scale-95 transition-all hover:bg-slate-100 cursor-pointer shrink-0 shadow-sm"
             >
-              <ArrowLeft size={24} />
+              <ArrowLeft size={18} />
             </button>
             <div className="flex flex-col justify-center leading-tight pl-1">
               <h1 className="text-sm font-bold text-slate-800">
@@ -1471,9 +1471,9 @@ export const CarRent: React.FC = () => {
         <div className="flex items-center gap-3.5">
           <button
             onClick={() => navigate(-1)}
-            className="w-11 h-11 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-800 active:scale-95 transition-all hover:bg-slate-100 hover:border-slate-300 cursor-pointer shrink-0 shadow-sm"
+            className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-800 active:scale-95 transition-all hover:bg-slate-100 cursor-pointer shrink-0 shadow-sm"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
           </button>
           <div>
             <h1 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-1.5">
@@ -2011,7 +2011,7 @@ export const CarRent: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setTripModal({ open: false, mode: "add" })}
-                className="p-2 -ml-2 rounded-xl bg-slate-50 text-slate-500 hover:bg-slate-100 transition-colors"
+                className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-800 active:scale-95 transition-all hover:bg-slate-100 cursor-pointer shrink-0 shadow-sm"
               >
                 <ArrowLeft size={18} />
               </button>

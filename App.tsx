@@ -24,14 +24,12 @@ import {
 // without requiring further network requests for split .js chunk files.
 import { Dashboard } from "@/pages/Dashboard";
 import { Projects } from "@/pages/Projects";
-import { Clients } from "@/pages/Clients";
 import { Income } from "@/pages/Income";
 import { Expenses } from "@/pages/Expenses";
 import { Reports } from "@/pages/Reports";
 import { Settings } from "@/pages/Settings";
 import { UpdatePassword } from "@/pages/UpdatePassword";
 import { AdminUserList } from "@/pages/AdminUserList";
-import { GhazalNotes } from "@/pages/GhazalNotes";
 import { IconGenerator } from "@/pages/IconGenerator";
 import { Profile } from "@/pages/Profile";
 import { Notifications } from "@/pages/Notifications";
@@ -39,7 +37,6 @@ import { JummaNotification } from "@/pages/JummaNotification";
 import ShoppingLists from "@/pages/ShoppingLists"; // default export
 import Trash from "@/pages/Trash"; // default export
 import { AIAssistant } from "@/pages/AIAssistant";
-import { ProjectsBackup } from "@/pages/ProjectsBackup";
 import { CarRent } from "@/pages/CarRent";
 import { Login } from "@/pages/Login";
 import { Signup } from "@/pages/Signup";
@@ -304,7 +301,7 @@ const AppContent: React.FC = () => {
                     />
                     <Route path="/dashboard" element={<Navigate to="/expenses" replace />} />
                     <Route path="/projects" element={<Navigate to="/expenses" replace />} />
-                    <Route path="/clients" element={<Clients />} />
+                    <Route path="/clients" element={<Navigate to="/expenses" replace />} />
                     <Route path="/income" element={<Navigate to="/expenses" replace />} />
                     <Route path="/expenses" element={<Expenses />} />
                     <Route path="/reports" element={<Reports />} />
@@ -313,13 +310,13 @@ const AppContent: React.FC = () => {
                     <Route path="/notifications" element={<Notifications />} />
                     <Route path="/notifications/jumma" element={<JummaNotification />} />
                     <Route path="/ai-assistant" element={<AIAssistant />} />
-                    <Route path="/ghazal-notes" element={<GhazalNotes />} />
+                    <Route path="/ghazal-notes" element={<Navigate to="/expenses" replace />} />
                     <Route path="/shopping-lists" element={<ShoppingLists />} />
                     <Route path="/car-rent" element={<CarRent />} />
                     <Route path="/trash" element={<Trash />} />
                     <Route
                       path="/projects-backup"
-                      element={<ProjectsBackup />}
+                      element={<Navigate to="/expenses" replace />}
                     />
                     {/* Default Route Logic */}
                     <Route

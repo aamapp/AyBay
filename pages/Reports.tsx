@@ -2095,9 +2095,9 @@ export const Reports: React.FC = () => {
               onClick={() => {
                 navigate("/");
               }}
-              className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-600 active:scale-95 transition-transform"
+              className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-800 active:scale-95 transition-all hover:bg-slate-100 cursor-pointer shrink-0 shadow-sm"
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft size={18} />
             </button>
             <div>
               <h1 className="text-xl font-black text-slate-800">
@@ -2510,9 +2510,9 @@ export const Reports: React.FC = () => {
                     setViewState("download");
                   }
                 }}
-                className="p-1 text-slate-800 hover:text-slate-950 active:scale-95 transition-all"
+                className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-800 active:scale-95 transition-all hover:bg-slate-100 cursor-pointer shrink-0 shadow-sm"
               >
-                <ArrowLeft size={24} />
+                <ArrowLeft size={18} />
               </button>
               <div className="flex flex-col justify-center leading-tight pl-1">
                 <h1 className="text-sm font-bold text-slate-800 font-sans">

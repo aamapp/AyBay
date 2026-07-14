@@ -54,9 +54,9 @@ export const Notifications = () => {
       <div className="sticky top-0 z-10 bg-slate-50 border-b border-slate-100 px-4 py-2.5 flex items-center justify-between">
         <button 
           onClick={() => navigate('/')} 
-          className="w-10 h-10 flex items-center justify-center -ml-2 rounded-full active:bg-slate-200 transition-colors z-20"
+          className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-800 active:scale-95 transition-all hover:bg-slate-100 cursor-pointer shrink-0 shadow-sm z-20"
         >
-          <ArrowLeft size={22} className="text-slate-800" strokeWidth={2.5}/>
+          <ArrowLeft size={18} />
         </button>
         <h1 className="text-[19px] font-normal text-slate-800 tracking-wide" style={{ fontFamily: "'Kohinoor Bangla', sans-serif" }}>নোটিফিকেশন</h1>
         <button 

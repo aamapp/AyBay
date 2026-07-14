@@ -56,9 +56,60 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
     "কন্টেন্ট তৈরি হচ্ছে...",
   ); // Dynamic message
   const [activeExpenseTab, setActiveExpenseTab] = useState<string>("expenses");
+  const [headerSwipeState, setHeaderSwipeState] = useState<{
+    isSwiping: boolean;
+    swipeOffset: number;
+    activeTab: string;
+  }>({
+    isSwiping: false,
+    swipeOffset: 0,
+    activeTab: "expenses",
+  });
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
+  const [resizeKey, setResizeKey] = useState(0);
+  const tabRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return typeof document !== "undefined" && (document.documentElement.classList.contains("dark") || localStorage.getItem("theme") === "dark");
   });
+
+  // Swipe state
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(
+    null,
+  );
+  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(
+    null,
+  );
+
+  const [isReportPreviewOpen, setIsReportPreviewOpen] = useState(false);
+
+  const {
+    adminSelectedUserId,
+    setAdminSelectedUserId,
+    trashedProjects,
+    trashedExpenses,
+    trashedGhazalNotes,
+    isOnline,
+    notifications,
+  } = useAppContext();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isAiAssistant = location.pathname === "/ai-assistant";
+  const isNotifications = location.pathname === "/notifications";
+  const isReports = location.pathname === "/reports";
+  const isSettings = location.pathname === "/settings";
+  const isTrash = location.pathname === "/trash";
+  const isShoppingLists = location.pathname === "/shopping-lists";
+  const isCarRent = location.pathname === "/car-rent";
+  const isFullScreenPage =
+    isAiAssistant ||
+    isNotifications ||
+    isReportPreviewOpen ||
+    isReports ||
+    isSettings ||
+    isTrash ||
+    isShoppingLists ||
+    isCarRent;
+  const isExpensesPage = location.pathname === "/expenses";
 
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
@@ -91,6 +142,22 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
       }
     };
     window.addEventListener("expense-active-tab-changed", handleActiveTabChange);
+
+    const handleSwipeUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail) {
+        const { isSwiping, swipeOffset, activeTab } = customEvent.detail;
+        setHeaderSwipeState({
+          isSwiping,
+          swipeOffset,
+          activeTab,
+        });
+        if (activeTab) {
+          setActiveExpenseTab(activeTab);
+        }
+      }
+    };
+    window.addEventListener("expense-swipe-update", handleSwipeUpdate);
     
     const handleToggleMoreMenu = (e: Event) => {
       const customEvent = e as CustomEvent;
@@ -107,9 +174,89 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
         "expense-active-tab-changed",
         handleActiveTabChange
       );
+      window.removeEventListener("expense-swipe-update", handleSwipeUpdate);
       window.removeEventListener("toggle-more-menu", handleToggleMoreMenu);
     };
   }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setResizeKey((prev) => prev + 1);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (!isExpensesPage) return;
+
+    const tabs = ["expenses", "dues", "reports", "savings", "tasks", "menu"];
+    const currentTab = headerSwipeState.isSwiping ? headerSwipeState.activeTab : activeExpenseTab;
+    const currEl = tabRefs.current[currentTab];
+    if (!currEl) return;
+
+    const screenWidth = window.innerWidth || 360;
+    const swipeOffset = headerSwipeState.swipeOffset;
+    const isSwiping = headerSwipeState.isSwiping;
+
+    const getTabProps = (tab: string) => {
+      const el = tabRefs.current[tab];
+      if (!el) return { left: 0, width: 28 };
+      
+      const isSm = window.innerWidth >= 640;
+      const indicatorWidth = isSm ? 32 : 28;
+      const left = el.offsetLeft + (el.offsetWidth - indicatorWidth) / 2;
+      return { left, width: indicatorWidth };
+    };
+
+    const currentProps = getTabProps(currentTab);
+    let targetLeft = currentProps.left;
+    let targetWidth = currentProps.width;
+
+    if (isSwiping && swipeOffset !== 0) {
+      const currentIndex = tabs.indexOf(currentTab);
+      let targetIndex = currentIndex;
+      if (swipeOffset > 0 && currentIndex < tabs.length - 1) {
+        targetIndex = currentIndex + 1;
+      } else if (swipeOffset < 0 && currentIndex > 0) {
+        targetIndex = currentIndex - 1;
+      }
+
+      if (targetIndex !== currentIndex) {
+        const targetTab = tabs[targetIndex];
+        const targetProps = getTabProps(targetTab);
+
+        const t = Math.min(1, Math.abs(swipeOffset) / screenWidth);
+
+        const L_curr = currentProps.left;
+        const R_curr = currentProps.left + currentProps.width;
+        const L_target = targetProps.left;
+        const R_target = targetProps.left + targetProps.width;
+
+        let L_t = L_curr;
+        let R_t = R_curr;
+
+        if (targetIndex > currentIndex) {
+          L_t = L_curr + Math.pow(t, 1.5) * (L_target - L_curr);
+          R_t = R_curr + Math.pow(t, 0.5) * (R_target - R_curr);
+        } else {
+          L_t = L_curr + Math.pow(t, 0.5) * (L_target - L_curr);
+          R_t = R_curr + Math.pow(t, 1.5) * (R_target - R_curr);
+        }
+
+        targetLeft = L_t;
+        targetWidth = Math.max(10, R_t - L_t);
+      } else {
+        const t = Math.min(1, Math.abs(swipeOffset) / screenWidth);
+        const stretchFactor = 1 + t * 0.5;
+        const w = currentProps.width * stretchFactor;
+        targetWidth = w;
+        targetLeft = currentProps.left - (w - currentProps.width) / 2;
+      }
+    }
+
+    setIndicatorStyle({ left: targetLeft, width: targetWidth });
+  }, [activeExpenseTab, headerSwipeState, isExpensesPage, resizeKey]);
 
   const handleExpenseTabClick = (tabName: string) => {
     setActiveExpenseTab(tabName);
@@ -117,51 +264,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
       new CustomEvent("expense-set-tab", { detail: { tab: tabName } })
     );
   };
-
-  // Swipe state
-  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(
-    null,
-  );
-  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(
-    null,
-  );
-
-  const [isReportPreviewOpen, setIsReportPreviewOpen] = useState(false);
-
-  const {
-    adminSelectedUserId,
-    setAdminSelectedUserId,
-    trashedProjects,
-    trashedExpenses,
-    trashedGhazalNotes,
-    isOnline,
-    notifications,
-  } = useAppContext();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const isAiAssistant = location.pathname === "/ai-assistant";
-  const isNotifications = location.pathname === "/notifications";
-  const isReports = location.pathname === "/reports";
-  const isSettings = location.pathname === "/settings";
-  const isProjectsBackup = location.pathname === "/projects-backup";
-  const isTrash = location.pathname === "/trash";
-  const isGhazalNotes = location.pathname === "/ghazal-notes";
-  const isShoppingLists = location.pathname === "/shopping-lists";
-  const isClients = location.pathname === "/clients";
-  const isCarRent = location.pathname === "/car-rent";
-  const isFullScreenPage =
-    isAiAssistant ||
-    isNotifications ||
-    isReportPreviewOpen ||
-    isReports ||
-    isSettings ||
-    isProjectsBackup ||
-    isTrash ||
-    isGhazalNotes ||
-    isShoppingLists ||
-    isClients ||
-    isCarRent;
-  const isExpensesPage = location.pathname === "/expenses";
 
   const handleNavigate = (path: string) => {
     setMoreMenuOpen(false);
@@ -244,18 +346,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
       desc: "বাজারের তালিকা",
     },
     {
-      name: "গজল নোট",
-      path: "/ghazal-notes",
-      icon: <BookOpen size={20} />,
-      desc: "গজলের লিরিক সংগ্রহ",
-    },
-    {
-      name: "ক্লায়েন্ট",
-      path: "/clients",
-      icon: <Users size={20} />,
-      desc: "ক্লায়েন্ট তালিকা",
-    },
-    {
       name: "গাড়ি ভাড়া হিসাব",
       path: "/car-rent",
       icon: <Car size={20} />,
@@ -272,12 +362,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
       path: "/trash",
       icon: <Trash2 size={20} />,
       desc: "ডিলিট করা প্রজেক্ট",
-    },
-    {
-      name: "প্রজেক্ট ব্যাকআপ",
-      path: "/projects-backup",
-      icon: <HardDrive size={20} />,
-      desc: "সম্পন্ন প্রজেক্ট ব্যাকআপ",
     },
     {
       name: "সেটিংস",
@@ -322,6 +406,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
   const minSwipeDistance = 50;
 
   const onTouchStart = (e: React.TouchEvent) => {
+    if (isExpensesPage) return;
     setTouchEnd(null);
     setTouchStart({
       x: e.targetTouches[0].clientX,
@@ -330,6 +415,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
+    if (isExpensesPage) return;
     setTouchEnd({
       x: e.targetTouches[0].clientX,
       y: e.targetTouches[0].clientY,
@@ -337,6 +423,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
   };
 
   const onTouchEndHandler = () => {
+    if (isExpensesPage) return;
     if (!touchStart || !touchEnd) return;
 
     if (isMoreMenuOpen || isAboutOpen || isProcessing) return;
@@ -350,22 +437,39 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
       const isLeftSwipe = dx > 0;
       const isRightSwipe = dx < 0;
 
-      const currentPath = location.pathname;
-      const primaryPaths = PRIMARY_NAV.map((nav) => nav.path);
-      const currentIndex = primaryPaths.indexOf(currentPath);
+      if (isExpensesPage) {
+        const expenseTabs = ["expenses", "dues", "reports", "savings", "tasks", "menu"];
+        const currentIndex = expenseTabs.indexOf(activeExpenseTab);
+        if (currentIndex !== -1) {
+          if (isLeftSwipe && currentIndex < expenseTabs.length - 1) {
+            handleExpenseTabClick(expenseTabs[currentIndex + 1]);
+          } else if (isRightSwipe && currentIndex > 0) {
+            handleExpenseTabClick(expenseTabs[currentIndex - 1]);
+          }
+        }
+      } else {
+        const currentPath = location.pathname;
+        const primaryPaths = PRIMARY_NAV.map((nav) => nav.path);
+        const currentIndex = primaryPaths.indexOf(currentPath);
 
-      if (currentIndex !== -1) {
-        if (isLeftSwipe && currentIndex < primaryPaths.length - 1) {
-          handleNavigate(primaryPaths[currentIndex + 1]);
-        } else if (isRightSwipe && currentIndex > 0) {
-          handleNavigate(primaryPaths[currentIndex - 1]);
+        if (currentIndex !== -1) {
+          if (isLeftSwipe && currentIndex < primaryPaths.length - 1) {
+            handleNavigate(primaryPaths[currentIndex + 1]);
+          } else if (isRightSwipe && currentIndex > 0) {
+            handleNavigate(primaryPaths[currentIndex - 1]);
+          }
         }
       }
     }
   };
 
   return (
-    <div className={`min-h-screen bg-[#fafbfd] font-sans w-full selection:bg-indigo-100 selection:text-indigo-700 flex flex-col lg:flex-row ${isExpensesPage ? 'overflow-x-clip' : 'overflow-x-hidden'}`}>
+    <div
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEndHandler}
+      className={`min-h-screen ${isExpensesPage ? 'bg-white' : 'bg-[#fafbfd]'} font-sans w-full selection:bg-indigo-100 selection:text-indigo-700 flex flex-col lg:flex-row ${isExpensesPage ? 'overflow-x-clip' : 'overflow-x-hidden'}`}
+    >
       {/* Desktop Sidebar - Visible only on LG screens */}
       {!isTrash && (
         <aside className="hidden lg:flex flex-col w-72 bg-white border-r border-slate-200 h-screen lg:fixed lg:top-0 lg:left-0 z-50">
@@ -502,7 +606,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
 
       {/* Mobile Header (App Bar) - Fixed to ensure it stays on top */}
       {!isFullScreenPage && (
-        <header className={`fixed top-0 inset-x-0 bg-white/95 backdrop-blur-md border-b-[1.5px] border-slate-300 lg:hidden z-40 max-w-[100vw] shadow-none overflow-hidden flex flex-col transition-all duration-300 ${isExpensesPage ? "h-[92px]" : "h-11"}`}>
+        <header className={`fixed top-0 inset-x-0 bg-white/95 backdrop-blur-md border-slate-300 ${isExpensesPage ? "" : "border-b-[1.5px]"} lg:hidden z-40 max-w-[100vw] shadow-none overflow-visible flex flex-col transition-all duration-300 ${isExpensesPage ? "h-[92px]" : "h-11"}`}>
           
           {/* Row 1: App Branding, Notifications, Theme & Settings (Always Visible at the Top) */}
           <div className="h-[44px] px-4 flex items-center justify-between w-full shrink-0">
@@ -559,9 +663,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
 
           {/* Row 2: Expenses Tab Header (Sub-navigation tabs, only visible on the Expenses page) */}
           {isExpensesPage && (
-            <div className="h-[48px] px-4 flex items-center justify-between w-full bg-white shrink-0">
+            <div className="h-[48px] px-4 flex items-center justify-between w-full bg-white shrink-0 relative">
               {/* Tab 1: Expenses / Dashboard / লেনদেন */}
               <button
+                ref={(el) => { tabRefs.current["expenses"] = el; }}
                 onClick={() => handleExpenseTabClick("expenses")}
                 title="লেনদেন / ড্যাশবোর্ড"
                 className="flex flex-col items-center justify-start pt-2 h-full w-8 sm:w-10 cursor-pointer group focus:outline-none relative"
@@ -587,13 +692,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
                     <path d="M4 15h16l-4.5 4.5" />
                   </svg>
                 </div>
-                {activeExpenseTab === "expenses" && (
-                  <div className="absolute bottom-0 h-[3px] w-7 sm:w-8 bg-[#1a73e8] rounded-t-[3px]" />
-                )}
               </button>
 
               {/* Tab 2: Dues / লেনা-দেনা */}
               <button
+                ref={(el) => { tabRefs.current["dues"] = el; }}
                 onClick={() => handleExpenseTabClick("dues")}
                 title="লেনা-দেনা / দেনা-পাওনা"
                 className="flex flex-col items-center justify-start pt-2 h-full w-8 sm:w-10 cursor-pointer group focus:outline-none relative"
@@ -619,13 +722,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
                     <path d="M15 20V4l4.5 4.5" />
                   </svg>
                 </div>
-                {activeExpenseTab === "dues" && (
-                  <div className="absolute bottom-0 h-[3px] w-7 sm:w-8 bg-[#1a73e8] rounded-t-[3px]" />
-                )}
               </button>
 
               {/* Tab 3: Reports / বাজেট ও রিপোর্ট */}
               <button
+                ref={(el) => { tabRefs.current["reports"] = el; }}
                 onClick={() => handleExpenseTabClick("reports")}
                 title="বজেট"
                 className="flex flex-col items-center justify-start pt-2 h-full w-8 sm:w-10 cursor-pointer group focus:outline-none relative"
@@ -650,13 +751,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
                     <path d="M 5.5 14.5 C 8 11.5, 9.5 9.5, 11.5 9.5 C 13.5 9.5, 14.5 14.5, 16.5 14.5 C 18 14.5, 19 13, 20 12" />
                   </svg>
                 </div>
-                {activeExpenseTab === "reports" && (
-                  <div className="absolute bottom-0 h-[3px] w-7 sm:w-8 bg-[#1a73e8] rounded-t-[3px]" />
-                )}
               </button>
 
               {/* Tab 4: Savings / সঞ্চয় ও লক্ষ্য */}
               <button
+                ref={(el) => { tabRefs.current["savings"] = el; }}
                 onClick={() => handleExpenseTabClick("savings")}
                 title="সঞ্চয় ও লক্ষ্য"
                 className="flex flex-col items-center justify-start pt-2 h-full w-8 sm:w-10 cursor-pointer group focus:outline-none relative"
@@ -670,13 +769,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
                 >
                   <Plus size={13} strokeWidth={2.5} />
                 </div>
-                {activeExpenseTab === "savings" && (
-                  <div className="absolute bottom-0 h-[3px] w-7 sm:w-8 bg-[#1a73e8] rounded-t-[3px]" />
-                )}
               </button>
 
               {/* Tab 5: Tasks / টাস্ক */}
               <button
+                ref={(el) => { tabRefs.current["tasks"] = el; }}
                 onClick={() => handleExpenseTabClick("tasks")}
                 title="টাস্ক"
                 className="flex flex-col items-center justify-start pt-2 h-full w-8 sm:w-10 cursor-pointer group focus:outline-none relative"
@@ -690,13 +787,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
                 >
                   <ListTodo size={13} strokeWidth={2.5} />
                 </div>
-                {activeExpenseTab === "tasks" && (
-                  <div className="absolute bottom-0 h-[3px] w-7 sm:w-8 bg-[#1a73e8] rounded-t-[3px]" />
-                )}
               </button>
 
               {/* Tab 7: Menu / মেনু */}
               <button
+                ref={(el) => { tabRefs.current["menu"] = el; }}
                 onClick={() => handleExpenseTabClick("menu")}
                 title="মেনু"
                 className="flex flex-col items-center justify-start pt-2 h-full w-8 sm:w-10 cursor-pointer group focus:outline-none relative"
@@ -723,10 +818,22 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
                     <User size={13} strokeWidth={2.5} />
                   )}
                 </div>
-                {activeExpenseTab === "menu" && (
-                  <div className="absolute bottom-0 h-[3px] w-7 sm:w-8 bg-[#1a73e8] rounded-t-[3px]" />
-                )}
               </button>
+
+              {/* Bottom border line as an absolute-positioned div so that indicators can perfectly sit on top and mask it */}
+              <div className="absolute bottom-0 inset-x-0 h-[1px] bg-slate-200 z-10" />
+
+              {/* Dynamic Sliding and Stretching Active Indicator */}
+              <div
+                className="absolute bottom-0 h-[4px] bg-[#1a73e8] rounded-t-[3px] z-20 pointer-events-none"
+                style={{
+                  left: `${indicatorStyle.left}px`,
+                  width: `${indicatorStyle.width}px`,
+                  transitionProperty: "left, width",
+                  transitionDuration: headerSwipeState.isSwiping ? "0s" : "0.75s",
+                  transitionTimingFunction: "cubic-bezier(0.4, 1.65, 0.45, 1.0)",
+                }}
+              />
             </div>
           )}
         </header>
