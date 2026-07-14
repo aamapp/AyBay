@@ -172,7 +172,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   >(() => {
     try {
       return JSON.parse(
-        localStorage.getItem("manage_me_dismissed_notifications") || "[]",
+        localStorage.getItem("ay_bay_dismissed_notifications") || "[]",
       );
     } catch {
       return [];
@@ -182,7 +182,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   const [readNotifications, setReadNotifications] = useState<string[]>(() => {
     try {
       return JSON.parse(
-        localStorage.getItem("manage_me_read_notifications") || "[]",
+        localStorage.getItem("ay_bay_read_notifications") || "[]",
       );
     } catch {
       return [];
@@ -193,7 +193,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     setDismissedNotifications((prev) => {
       const next = [...prev, id];
       localStorage.setItem(
-        "manage_me_dismissed_notifications",
+        "ay_bay_dismissed_notifications",
         JSON.stringify(next),
       );
       return next;
@@ -205,7 +205,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       if (prev.includes(id)) return prev;
       const next = [...prev, id];
       localStorage.setItem(
-        "manage_me_read_notifications",
+        "ay_bay_read_notifications",
         JSON.stringify(next),
       );
       return next;
@@ -358,7 +358,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     setDismissedNotifications((prev) => {
       const next = Array.from(new Set([...prev, ...currentIds]));
       localStorage.setItem(
-        "manage_me_dismissed_notifications",
+        "ay_bay_dismissed_notifications",
         JSON.stringify(next),
       );
       return next;
@@ -371,7 +371,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     if (savedUser) {
       try {
         const user = JSON.parse(savedUser);
-        const cacheKey = `manage_me_cache_${user.id}`;
+        const cacheKey = `ay_bay_cache_${user.id}`;
         const cachedData = localStorage.getItem(cacheKey);
         if (cachedData) {
           const parsed = JSON.parse(cachedData);
@@ -427,18 +427,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const setAppPin = (pin: string | null) => {
     if (pin) {
-      localStorage.setItem("manage_me_pin", pin);
+      localStorage.setItem("ay_bay_pin", pin);
     } else {
-      localStorage.removeItem("manage_me_pin");
+      localStorage.removeItem("ay_bay_pin");
     }
     setAppPinState(pin);
   };
 
   const setIsFingerprintEnabled = (enabled: boolean) => {
     if (enabled) {
-      localStorage.setItem("manage_me_fingerprint", "true");
+      localStorage.setItem("ay_bay_fingerprint", "true");
     } else {
-      localStorage.removeItem("manage_me_fingerprint");
+      localStorage.removeItem("ay_bay_fingerprint");
     }
     setIsFingerprintEnabledState(enabled);
   };
@@ -541,7 +541,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
           }
 
           // Update Cache for Admin
-          const cacheKey = `manage_me_cache_${user.id}`;
+          const cacheKey = `ay_bay_cache_${user.id}`;
           localStorage.setItem(
             cacheKey,
             JSON.stringify({
@@ -734,7 +734,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
           setTrashedDuePersons(userTrashedDuePersons);
 
           // Update Cache for Offline Support
-          const cacheKey = `manage_me_cache_${user.id}`;
+          const cacheKey = `ay_bay_cache_${user.id}`;
           localStorage.setItem(
             cacheKey,
             JSON.stringify({
@@ -1078,13 +1078,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     let mounted = true;
 
     // Check local storage for PIN and Fingerprint
-    const savedPin = localStorage.getItem("manage_me_pin");
+    const savedPin = localStorage.getItem("ay_bay_pin");
     if (savedPin) {
       setAppPinState(savedPin);
       setIsAppLocked(true);
     }
 
-    const savedFingerprint = localStorage.getItem("manage_me_fingerprint");
+    const savedFingerprint = localStorage.getItem("ay_bay_fingerprint");
     if (savedFingerprint === "true") {
       setIsFingerprintEnabledState(true);
       setIsAppLocked(true);

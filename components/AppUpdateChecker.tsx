@@ -193,7 +193,7 @@ export const AppUpdateChecker: React.FC = () => {
         .maybeSingle();
 
       if (error) {
-        console.error('Error checking for update:', error);
+        console.warn('App update checking skipped or table not created yet:', error.message || error);
         return;
       }
 

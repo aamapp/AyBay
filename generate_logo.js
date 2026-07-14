@@ -7,7 +7,7 @@ async function generateLogo() {
     contents: {
       parts: [
         {
-          text: "A high-quality, professional app icon for a software named 'Manage-Me'. The design features a vibrant purple square with rounded corners (iOS style). In the center, there is a clean, bold, white letter 'M'. The style is minimalist, modern, and flat design, with a very subtle gradient on the purple background. 1024x1024 resolution, sharp edges, no text other than the letter M, centered perfectly.",
+          text: "A high-quality, professional app icon for a software named 'Ay-Bay'. The design features a vibrant blue and teal square with rounded corners (iOS style). In the center, there is a clean, bold, white text 'AB'. The style is minimalist, modern, and flat design, with a very subtle gradient. 1024x1024 resolution, sharp edges, no text other than the letters AB, centered perfectly.",
         },
       ],
     },
